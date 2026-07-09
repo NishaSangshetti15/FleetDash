@@ -1,2 +1,17 @@
 # FleetDash
-FleetDash is a MERN stack application for real-time fleet tracking and monitoring. It processes high-frequency vehicle telemetry, displays live locations on an interactive map, detects geofence breaches, and provides instant updates using Socket.io, Redis, MongoDB, and React Canvas for high-performance visualization.
+
+A high-throughput, event-driven fleet telemetry dashboard.
+Tracks live vehicle positions, stores GPS history efficiently, and alerts
+on geofence boundary crossings in real time.
+
+## Status
+Day 1: basic Express server with a health check endpoint.
+
+## Run it
+```bash
+cd backend
+cp .env.example .env
+npm install
+npm start
+```
+Then visit http://localhost:4000/health
