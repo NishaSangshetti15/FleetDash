@@ -1,20 +1,13 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const mongoose = require("mongoose");
 
-dotenv.config();
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
+};
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/fleetdash';
-
-let connected = false;
-
-async function connect() {
-  if (connected) return mongoose;
-  await mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  connected = true;
-  return mongoose;
-}
-
-module.exports = { connect, mongoose };
+module.exports = connectDB;
