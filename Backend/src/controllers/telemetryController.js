@@ -1,5 +1,7 @@
 console.log("✅ telemetryController loaded");
+
 const TelemetryBucket = require("../models/TelemetryBucket");
+const { getIO } = require("../socket");
 
 const addTelemetry = async (req, res) => {
   try {
@@ -35,6 +37,10 @@ const addTelemetry = async (req, res) => {
     });
 
     await bucket.save();
+
+    // Send live update
+    const io = getIO();
+    io.emit("telemetry-update", bucket);
 
     res.status(201).json({
       success: true,

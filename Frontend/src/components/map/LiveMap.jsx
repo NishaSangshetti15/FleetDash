@@ -1,32 +1,90 @@
-// LiveMap.jsx
-// Section card that will display the live vehicle map.
-// For now it renders a styled placeholder container.
-// A real map (e.g. using Leaflet) will be plugged in here later.
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
-import '../../styles/dashboard.css';
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-function LiveMap() {
+import "../../styles/dashboard.css";
+
+// Fix default Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+function LiveMap({ vehicles = [] }) {
+  const defaultCenter = [18.5204, 73.8567];
+
   return (
     <div className="section-card">
-
-      {/* Section header row */}
+      {/* Header */}
       <div className="section-header">
         <h2 className="section-title">
           <span className="section-title-dot" />
           Live Fleet Map
         </h2>
+
         <span className="section-tag">Real-time</span>
       </div>
 
-      {/* Placeholder — map component goes here in the next phase */}
-      <div className="section-placeholder placeholder-map">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-          <circle cx="12" cy="9" r="2.5" />
-        </svg>
-        <span>Live map will be displayed here</span>
-      </div>
+      {/* Map */}
+      <MapContainer
+        center={defaultCenter}
+        zoom={12}
+        style={{
+          height: "450px",
+          width: "100%",
+          borderRadius: "12px",
+        }}
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
+        {vehicles.map((vehicle) => {
+          const latitude = vehicle.currentLocation?.latitude;
+          const longitude = vehicle.currentLocation?.longitude;
+
+          if (latitude == null || longitude == null) {
+            return null;
+          }
+
+          return (
+            <Marker
+              key={vehicle._id}
+              position={[latitude, longitude]}
+            >
+              <Popup>
+                <div>
+                  <h3>{vehicle.vehicleId}</h3>
+
+                  <p>
+                    <strong>Driver:</strong> {vehicle.driverName}
+                  </p>
+
+                  <p>
+                    <strong>Status:</strong> {vehicle.status}
+                  </p>
+
+                  <p>
+                    <strong>Latitude:</strong> {latitude}
+                  </p>
+
+                  <p>
+                    <strong>Longitude:</strong> {longitude}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
     </div>
   );
 }

@@ -5,7 +5,7 @@
 //
 // For now, this file is just a placeholder with a sample function structure.
 
-const BASE_URL = 'http://localhost:5000/api'; // backend URL (to be configured later)
+const BASE_URL = 'http://localhost:5001/api'; // backend URL (to be configured later)
 
 // Example function — will be filled in when the backend is connected
 async function getVehicles() {

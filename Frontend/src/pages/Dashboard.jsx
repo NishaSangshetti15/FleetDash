@@ -1,78 +1,90 @@
-import { useState, useEffect } from 'react';
-import '../styles/dashboard.css';
+import { useState, useEffect } from "react";
+import "../styles/dashboard.css";
 
-import Navbar from '../components/layout/Navbar';
-import Sidebar from '../components/layout/Sidebar';
-import DashboardCards from '../components/dashboard/DashboardCards';
-import LiveMap from '../components/map/LiveMap';
-import VehicleTable from '../components/vehicles/VehicleTable';
-import AlertPanel from '../components/alerts/AlertPanel';
+import Navbar from "../components/layout/Navbar";
+import Sidebar from "../components/layout/Sidebar";
+import DashboardCards from "../components/dashboard/DashboardCards";
+import LiveMap from "../components/map/LiveMap";
+import VehicleTable from "../components/vehicles/VehicleTable";
+import AlertPanel from "../components/alerts/AlertPanel";
 
-import { getVehicles } from '../services/api';
+import { getVehicles } from "../services/api";
 
 function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch vehicle telemetry from API when component mounts
   useEffect(() => {
     async function loadVehicles() {
       try {
         setLoading(true);
+
         const data = await getVehicles();
+
+        console.log("✅ Vehicles from API:", data);
+
         setVehicles(data);
         setError(null);
       } catch (err) {
-        console.error("Error fetching vehicles:", err);
+        console.error("❌ Error fetching vehicles:", err);
         setError("Failed to fetch live vehicle telemetry.");
       } finally {
         setLoading(false);
       }
     }
+
     loadVehicles();
   }, []);
 
   return (
-    // Outer wrapper: sidebar (fixed left) + main area (right)
     <div className="app-layout">
-
-      {/* Fixed left sidebar with navigation */}
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main content area: navbar on top, page content below */}
+      {/* Main Content */}
       <div className="main-area">
-
-        {/* Sticky top navbar */}
+        {/* Navbar */}
         <Navbar />
 
-        {/* Scrollable page content */}
         <main className="page-content">
-
-          {/* Page heading */}
+          {/* Page Header */}
           <div className="page-header">
             <div>
               <h1 className="page-heading">Dashboard</h1>
-              <p className="page-subheading">Fleet telemetry overview</p>
+              <p className="page-subheading">
+                Fleet telemetry overview
+              </p>
             </div>
-            <span className="page-header-badge">Live View</span>
+
+            <span className="page-header-badge">
+              Live View
+            </span>
           </div>
 
-          {/* Summary metric cards (Total Vehicles, Active, Offline, Alerts) */}
-          <DashboardCards vehicles={vehicles} loading={loading} error={error} />
+          {/* Dashboard Cards */}
+          <DashboardCards
+            vehicles={vehicles}
+            loading={loading}
+            error={error}
+          />
 
-          {/* Live map section */}
-          <LiveMap />
+          {/* Live Map */}
+          <LiveMap
+            vehicles={vehicles}
+          />
 
-          {/* Vehicle list section */}
-          <VehicleTable vehicles={vehicles} loading={loading} error={error} />
+          {/* Vehicle Table */}
+          <VehicleTable
+            vehicles={vehicles}
+            loading={loading}
+            error={error}
+          />
 
-          {/* Recent alerts section */}
+          {/* Alert Panel */}
           <AlertPanel />
-
         </main>
       </div>
-
     </div>
   );
 }
