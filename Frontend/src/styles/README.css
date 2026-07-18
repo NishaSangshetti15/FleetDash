@@ -1,0 +1,14 @@
+/* styles/
+ *
+ * This folder will contain CSS files for styling the dashboard.
+ *
+ * Planned files:
+ *   - global.css        — base styles, CSS variables, font imports
+ *   - sidebar.css       — styles for the Sidebar component
+ *   - navbar.css        — styles for the Navbar component
+ *   - dashboard.css     — styles for the Dashboard page layout
+ *   - vehicleTable.css  — styles for the VehicleTable component
+ *   - alertPanel.css    — styles for the AlertPanel component
+ *
+ * For now, this folder is empty. Styles will be added in the next phase.
+ */

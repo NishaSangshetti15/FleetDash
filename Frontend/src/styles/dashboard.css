@@ -1,0 +1,241 @@
+/*
+ * dashboard.css — Layout and section styles for the Dashboard page
+ *
+ * This file covers:
+ *  - The overall app layout (sidebar + main area)
+ *  - The page header
+ *  - Reusable section card styles
+ *  - Stats cards grid
+ *  - Responsive breakpoints
+ */
+
+/* ── Overall app layout ────────────────────────────────────────────── */
+
+/* Outer wrapper: sidebar sits on the left, main area fills the rest */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main area: everything to the right of the sidebar */
+.main-area {
+  margin-left: var(--sidebar-width); /* push content past the fixed sidebar */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Page content area (below the navbar) ──────────────────────────── */
+.page-content {
+  padding: 24px;
+  flex: 1;
+}
+
+/* ── Page header row ───────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.page-heading {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  line-height: 1.2;
+}
+
+.page-subheading {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* Small date/time badge shown in the header */
+.page-header-badge {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background-color: var(--bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+}
+
+/* ── Stats cards grid ──────────────────────────────────────────────── */
+
+/* 4-column grid for the metric cards at the top */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Individual stat card */
+.stat-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Colored left border strip to visually differentiate each stat */
+.stat-card.blue   { border-left: 4px solid #3b82f6; }
+.stat-card.green  { border-left: 4px solid #22c55e; }
+.stat-card.orange { border-left: 4px solid #f97316; }
+.stat-card.red    { border-left: 4px solid #ef4444; }
+
+/* Top row inside a stat card: label on the left, icon on the right */
+.stat-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* Icon container — soft background circle matching each card's accent color */
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--color-text-muted);
+}
+
+/* The big number in the center of each stat card */
+.stat-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  line-height: 1;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Reusable section card ─────────────────────────────────────────── */
+
+/* White rounded card used by each dashboard section */
+.section-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+
+/* Section heading row inside a card */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+/* Small colored circle beside section titles */
+.section-title-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Small text label on the right side of a section header */
+.section-tag {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: var(--bg-main);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+/* ── Placeholder area inside each section ──────────────────────────── */
+
+/* Dashed box shown while real content (table, map, etc.) is not yet built */
+.section-placeholder {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+}
+
+.section-placeholder svg {
+  opacity: 0.4;
+}
+
+/* Different heights for different sections */
+.placeholder-map   { height: 300px; }
+.placeholder-table { height: 220px; }
+.placeholder-alert { height: 180px; }
+
+/* ── Responsive: tablet (≤ 1024px) ────────────────────────────────── */
+@media (max-width: 1024px) {
+  /* Collapse stats to 2 columns on tablet */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .page-content {
+    padding: 18px;
+  }
+}
+
+/* ── Responsive: small screen (≤ 768px) ────────────────────────────── */
+@media (max-width: 768px) {
+  /* Stack sidebar above the main content on small screens */
+  .app-layout {
+    flex-direction: column;
+  }
+
+  /* The sidebar no longer needs to be fixed or offset */
+  .main-area {
+    margin-left: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .navbar-search {
+    display: none; /* hide search on small screens to save space */
+  }
+}
