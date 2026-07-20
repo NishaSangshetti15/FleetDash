@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -8,7 +8,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 import "../../styles/dashboard.css";
 
-// Fix default Leaflet marker icons
+// Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -17,12 +17,30 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// Component to move the map when coordinates change
+function ChangeMapView({ center }) {
+  const map = useMap();
+
+  map.setView(center, 15);
+
+  return null;
+}
+
 function LiveMap({ vehicles = [] }) {
   const defaultCenter = [18.5204, 73.8567];
 
+  const firstVehicle = vehicles[0];
+
+  const center =
+    firstVehicle?.currentLocation
+      ? [
+          firstVehicle.currentLocation.latitude,
+          firstVehicle.currentLocation.longitude,
+        ]
+      : defaultCenter;
+
   return (
     <div className="section-card">
-      {/* Header */}
       <div className="section-header">
         <h2 className="section-title">
           <span className="section-title-dot" />
@@ -32,16 +50,17 @@ function LiveMap({ vehicles = [] }) {
         <span className="section-tag">Real-time</span>
       </div>
 
-      {/* Map */}
       <MapContainer
-        center={defaultCenter}
-        zoom={12}
+        center={center}
+        zoom={15}
         style={{
           height: "450px",
           width: "100%",
           borderRadius: "12px",
         }}
       >
+        <ChangeMapView center={center} />
+
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -51,9 +70,7 @@ function LiveMap({ vehicles = [] }) {
           const latitude = vehicle.currentLocation?.latitude;
           const longitude = vehicle.currentLocation?.longitude;
 
-          if (latitude == null || longitude == null) {
-            return null;
-          }
+          if (latitude == null || longitude == null) return null;
 
           return (
             <Marker

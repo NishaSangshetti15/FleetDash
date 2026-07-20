@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../styles/dashboard.css";
+import socket from "../socket";
 
 import Navbar from "../components/layout/Navbar";
 import Sidebar from "../components/layout/Sidebar";
@@ -60,7 +61,46 @@ function Dashboard() {
 
     // Clean up the interval on unmount
     return () => clearInterval(intervalId);
+    loadVehicles();
+
+    socket.on("telemetry-update", () => {
+  console.log("📡 Live telemetry received");
+
+  loadVehicles();
+});
+
   }, []);
+
+  useEffect(() => {
+  socket.on("telemetry-update", (bucket) => {
+    console.log("📡 Live Telemetry:", bucket);
+
+    setVehicles((prevVehicles) =>
+      prevVehicles.map((vehicle) => {
+        if (vehicle.vehicleId !== bucket.vehicleId) {
+          return vehicle;
+        }
+
+        const latest =
+          bucket.telemetry[bucket.telemetry.length - 1];
+
+        return {
+          ...vehicle,
+          currentLocation: {
+            latitude: latest.latitude,
+            longitude: latest.longitude,
+          },
+          speed: latest.speed,
+          fuel: latest.fuel,
+        };
+      })
+    );
+  });
+
+  return () => {
+    socket.off("telemetry-update");
+  };
+}, []);
 
   return (
     <div className="app-layout">
