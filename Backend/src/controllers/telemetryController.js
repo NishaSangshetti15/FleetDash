@@ -6,6 +6,9 @@ const { getIO } = require("../socket");
 
 const addTelemetry = async (req, res) => {
   try {
+    console.log("========== TELEMETRY RECEIVED ==========");
+    console.log(req.body);
+
     const {
       vehicleId,
       latitude,
@@ -16,7 +19,6 @@ const addTelemetry = async (req, res) => {
 
     const hour = new Date().toISOString().slice(0, 13);
 
-    // Find or create telemetry bucket
     let bucket = await TelemetryBucket.findOne({
       vehicleId,
       hour,
@@ -30,7 +32,6 @@ const addTelemetry = async (req, res) => {
       });
     }
 
-    // Add new telemetry record
     bucket.telemetry.push({
       latitude,
       longitude,
@@ -41,8 +42,7 @@ const addTelemetry = async (req, res) => {
 
     await bucket.save();
 
-    // Update current vehicle location
-    await Vehicle.findOneAndUpdate(
+    const updatedVehicle = await Vehicle.findOneAndUpdate(
       { vehicleId },
       {
         currentLocation: {
@@ -53,12 +53,18 @@ const addTelemetry = async (req, res) => {
         fuel,
         updatedAt: new Date(),
       },
-      { new: true }
+      {
+        new: true,
+      }
     );
 
-    // Send live update to all connected clients
+    console.log("Vehicle Updated:");
+    console.log(updatedVehicle);
+
     const io = getIO();
 
+    console.log("📡 Connected Clients:", io.engine.clientsCount);
+    console.log("📡 Sending telemetry update...");
     io.emit("telemetry-update", {
       vehicleId,
       latitude,
@@ -67,6 +73,8 @@ const addTelemetry = async (req, res) => {
       fuel,
       timestamp: new Date(),
     });
+
+    console.log("✅ Telemetry event emitted");
 
     res.status(201).json({
       success: true,

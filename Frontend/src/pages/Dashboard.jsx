@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import "../styles/dashboard.css";
 import socket from "../socket";
 
@@ -14,106 +15,81 @@ import dummyAlerts from "../data/dummyAlerts";
 
 function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
-  const [alerts, setAlerts] = useState([]);
+  const [alerts] = useState(dummyAlerts);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Initial load when the component mounts
-    async function loadData() {
-      try {
-        setLoading(true);
+  // Load vehicles from backend
+  const loadVehicles = async () => {
+    try {
+      const data = await getVehicles();
 
-        // Fetching vehicles from the REST API
-        const data = await getVehicles();
-        console.log("✅ Vehicles from API (Initial):", data);
-        setVehicles(data);
+      console.log("✅ Vehicles:", data);
 
-        // Setting initial alerts from dummy data
-        setAlerts(dummyAlerts);
-        setError(null);
-      } catch (err) {
-        console.error("❌ Error fetching vehicles:", err);
-        setError("Failed to fetch live vehicle telemetry.");
-      } finally {
-        setLoading(false);
-      }
+      setVehicles(data);
+      setError(null);
+    } catch (err) {
+      console.error("❌ Error:", err);
+      setError("Failed to fetch vehicles");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    loadData();
-
-    // Polling every 5 seconds to get the latest vehicle telemetry
-    // NOTE: For Phase 4, this setInterval can be replaced with Socket.io listeners:
-    // socket.on("telemetry-update", (newData) => { ... })
-    const intervalId = setInterval(async () => {
-      try {
-        const data = await getVehicles();
-        console.log("✅ Vehicles from API (Poll):", data);
-        setVehicles(data);
-        // Clear error if the poll succeeds
-        setError(null);
-      } catch (err) {
-        // Log the error but continue polling on the next interval
-        // Do not overwrite already displayed vehicle data with empty data
-        console.error("❌ Error fetching vehicles during polling:", err);
-      }
-    }, 5000);
-
-    // Clean up the interval on unmount
-    return () => clearInterval(intervalId);
+  useEffect(() => {
     loadVehicles();
 
-    socket.on("telemetry-update", () => {
-  console.log("📡 Live telemetry received");
+    // Connect Socket
+    socket.connect();
 
-  loadVehicles();
-});
+    socket.on("connect", () => {
+      console.log("🟢 Socket Connected:", socket.id);
+    });
 
+    // Listen to every socket event (Debug)
+    socket.onAny((event, data) => {
+      console.log("📨 Event Received:", event, data);
+    });
+
+    // Live telemetry update
+    socket.on("telemetry-update", (telemetry) => {
+      console.log("📡 Live Telemetry:", telemetry);
+
+      setVehicles((prevVehicles) =>
+        prevVehicles.map((vehicle) => {
+          if (vehicle.vehicleId !== telemetry.vehicleId) {
+            return vehicle;
+          }
+
+          return {
+            ...vehicle,
+            currentLocation: {
+              latitude: telemetry.latitude,
+              longitude: telemetry.longitude,
+            },
+            speed: telemetry.speed,
+            fuel: telemetry.fuel,
+            updatedAt: telemetry.timestamp,
+          };
+        })
+      );
+    });
+
+    return () => {
+      socket.off("telemetry-update");
+      socket.offAny();
+      socket.disconnect();
+    };
   }, []);
-
-  useEffect(() => {
-  socket.on("telemetry-update", (bucket) => {
-    console.log("📡 Live Telemetry:", bucket);
-
-    setVehicles((prevVehicles) =>
-      prevVehicles.map((vehicle) => {
-        if (vehicle.vehicleId !== bucket.vehicleId) {
-          return vehicle;
-        }
-
-        const latest =
-          bucket.telemetry[bucket.telemetry.length - 1];
-
-        return {
-          ...vehicle,
-          currentLocation: {
-            latitude: latest.latitude,
-            longitude: latest.longitude,
-          },
-          speed: latest.speed,
-          fuel: latest.fuel,
-        };
-      })
-    );
-  });
-
-  return () => {
-    socket.off("telemetry-update");
-  };
-}, []);
 
   return (
     <div className="app-layout">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <div className="main-area">
-        {/* Navbar */}
         <Navbar />
 
         <main className="page-content">
-          {/* Page Header */}
           <div className="page-header">
             <div>
               <h1 className="page-heading">Dashboard</h1>
@@ -127,7 +103,6 @@ function Dashboard() {
             </span>
           </div>
 
-          {/* Dashboard Cards */}
           <DashboardCards
             vehicles={vehicles}
             loading={loading}
@@ -135,22 +110,15 @@ function Dashboard() {
             alerts={alerts}
           />
 
-          {/* Live Map */}
-          <LiveMap
-            vehicles={vehicles}
-          />
+          <LiveMap vehicles={vehicles} />
 
-          {/* Vehicle Table */}
           <VehicleTable
             vehicles={vehicles}
             loading={loading}
             error={error}
           />
 
-          {/* Alert Panel */}
-          <AlertPanel
-            alerts={alerts}
-          />
+          <AlertPanel alerts={alerts} />
         </main>
       </div>
     </div>
