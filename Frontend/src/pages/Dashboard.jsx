@@ -42,6 +42,8 @@ function Dashboard() {
     loadData();
 
     // Polling every 5 seconds to get the latest vehicle telemetry
+    // NOTE: For Phase 4, this setInterval can be replaced with Socket.io listeners:
+    // socket.on("telemetry-update", (newData) => { ... })
     const intervalId = setInterval(async () => {
       try {
         const data = await getVehicles();
