@@ -1,14 +1,10 @@
 // AlertPanel.jsx
-// Displays recent telemetry alerts using simulated dummy data.
-//
-// TODO: Replace dummyAlerts dataset with real-time Socket.io events
-// in the future to show live alerts as they are fired by the server.
+// Displays recent telemetry alerts using data received through props.
 
-import dummyAlerts from '../../data/dummyAlerts';
 import '../../styles/dashboard.css';
 import '../../styles/alertPanel.css';
 
-function AlertPanel() {
+function AlertPanel({ alerts = [] }) {
   return (
     <div className="section-card">
 
@@ -19,16 +15,16 @@ function AlertPanel() {
           Recent Alerts
         </h2>
         <span className="section-tag">
-          {dummyAlerts.length} Active {dummyAlerts.length === 1 ? 'alert' : 'alerts'}
+          {alerts.length} Active {alerts.length === 1 ? 'alert' : 'alerts'}
         </span>
       </div>
 
       {/* Alert List Container */}
       <div className="alert-list">
-        {dummyAlerts.length === 0 ? (
+        {alerts.length === 0 ? (
           <div className="alert-empty">No recent alerts.</div>
         ) : (
-          dummyAlerts.map((alert) => (
+          alerts.map((alert) => (
             <div className="alert-item" key={alert.id}>
               
               {/* Left Side: Telemetry details */}

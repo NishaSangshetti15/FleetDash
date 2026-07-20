@@ -9,22 +9,27 @@ import VehicleTable from "../components/vehicles/VehicleTable";
 import AlertPanel from "../components/alerts/AlertPanel";
 
 import { getVehicles } from "../services/api";
+import dummyAlerts from "../data/dummyAlerts";
 
 function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function loadVehicles() {
+    // Initial load when the component mounts
+    async function loadData() {
       try {
         setLoading(true);
 
+        // Fetching vehicles from the REST API
         const data = await getVehicles();
-
-        console.log("✅ Vehicles from API:", data);
-
+        console.log("✅ Vehicles from API (Initial):", data);
         setVehicles(data);
+
+        // Setting initial alerts from dummy data
+        setAlerts(dummyAlerts);
         setError(null);
       } catch (err) {
         console.error("❌ Error fetching vehicles:", err);
@@ -34,7 +39,25 @@ function Dashboard() {
       }
     }
 
-    loadVehicles();
+    loadData();
+
+    // Polling every 5 seconds to get the latest vehicle telemetry
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await getVehicles();
+        console.log("✅ Vehicles from API (Poll):", data);
+        setVehicles(data);
+        // Clear error if the poll succeeds
+        setError(null);
+      } catch (err) {
+        // Log the error but continue polling on the next interval
+        // Do not overwrite already displayed vehicle data with empty data
+        console.error("❌ Error fetching vehicles during polling:", err);
+      }
+    }, 5000);
+
+    // Clean up the interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -67,6 +90,7 @@ function Dashboard() {
             vehicles={vehicles}
             loading={loading}
             error={error}
+            alerts={alerts}
           />
 
           {/* Live Map */}
@@ -82,7 +106,9 @@ function Dashboard() {
           />
 
           {/* Alert Panel */}
-          <AlertPanel />
+          <AlertPanel
+            alerts={alerts}
+          />
         </main>
       </div>
     </div>

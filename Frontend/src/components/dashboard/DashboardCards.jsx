@@ -53,7 +53,7 @@ function IconAlerts() {
 }
 
 // ── Component ─────────────────────────────────────────────────────────
-function DashboardCards({ vehicles = [], loading = false, error = null }) {
+function DashboardCards({ vehicles = [], loading = false, error = null, alerts = [] }) {
   
   // Calculate statistics from the API response
   // If loading, show "...". If error, show "—"
@@ -75,8 +75,8 @@ function DashboardCards({ vehicles = [], loading = false, error = null }) {
         (v) => (v.status || '').toLowerCase() === 'offline'
       ).length;
 
-  // TODO: Replace with real alert count once /api/alerts is connected
-  const alertsToday = 3;
+  // Calculate alerts dynamically from the alerts prop
+  const alertsToday = loading ? '...' : error ? '—' : alerts.length;
 
   const cards = [
     {
