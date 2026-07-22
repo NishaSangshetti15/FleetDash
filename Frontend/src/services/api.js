@@ -25,4 +25,20 @@ async function getVehicles() {
   throw new Error("Invalid response format from server");
 }
 
-export { getVehicles };
+async function getAlerts() {
+  const response = await fetch(`${BASE_URL}/alerts`);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+
+  const result = await response.json();
+
+  if (result.success) {
+    return result.data;
+  }
+
+  throw new Error("Invalid response format");
+}
+
+export { getVehicles, getAlerts };

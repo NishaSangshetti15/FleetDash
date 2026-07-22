@@ -10,53 +10,47 @@ import LiveMap from "../components/map/LiveMap";
 import VehicleTable from "../components/vehicles/VehicleTable";
 import AlertPanel from "../components/alerts/AlertPanel";
 
-import { getVehicles } from "../services/api";
-import dummyAlerts from "../data/dummyAlerts";
+import { getVehicles, getAlerts } from "../services/api";
 
 function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
-  const [alerts] = useState(dummyAlerts);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load vehicles from backend
-  const loadVehicles = async () => {
+  const loadData = async () => {
     try {
-      const data = await getVehicles();
+      setLoading(true);
 
-      console.log("✅ Vehicles:", data);
+      const vehicleData = await getVehicles();
+      setVehicles(vehicleData);
 
-      setVehicles(data);
+      const alertData = await getAlerts();
+      setAlerts(alertData);
+
       setError(null);
     } catch (err) {
-      console.error("❌ Error:", err);
-      setError("Failed to fetch vehicles");
+      console.error(err);
+      setError("Failed to fetch data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadVehicles();
+    loadData();
 
-    // Connect Socket
     socket.connect();
 
     socket.on("connect", () => {
       console.log("🟢 Socket Connected:", socket.id);
     });
 
-    // Listen to every socket event (Debug)
-    socket.onAny((event, data) => {
-      console.log("📨 Event Received:", event, data);
-    });
-
-    // Live telemetry update
     socket.on("telemetry-update", (telemetry) => {
-      console.log("📡 Live Telemetry:", telemetry);
+      console.log("📡 Telemetry:", telemetry);
 
-      setVehicles((prevVehicles) =>
-        prevVehicles.map((vehicle) => {
+      setVehicles((prev) =>
+        prev.map((vehicle) => {
           if (vehicle.vehicleId !== telemetry.vehicleId) {
             return vehicle;
           }
@@ -75,9 +69,15 @@ function Dashboard() {
       );
     });
 
+    socket.on("new-alert", (alert) => {
+      console.log("🚨 Alert:", alert);
+
+      setAlerts((prev) => [alert, ...prev]);
+    });
+
     return () => {
       socket.off("telemetry-update");
-      socket.offAny();
+      socket.off("new-alert");
       socket.disconnect();
     };
   }, []);
@@ -90,11 +90,12 @@ function Dashboard() {
         <Navbar />
 
         <main className="page-content">
+
           <div className="page-header">
             <div>
               <h1 className="page-heading">Dashboard</h1>
               <p className="page-subheading">
-                Fleet telemetry overview
+                Fleet Telemetry Overview
               </p>
             </div>
 
@@ -105,9 +106,9 @@ function Dashboard() {
 
           <DashboardCards
             vehicles={vehicles}
+            alerts={alerts}
             loading={loading}
             error={error}
-            alerts={alerts}
           />
 
           <LiveMap vehicles={vehicles} />
@@ -119,6 +120,7 @@ function Dashboard() {
           />
 
           <AlertPanel alerts={alerts} />
+
         </main>
       </div>
     </div>

@@ -8,6 +8,8 @@ const connectDB = require("./config");
 
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const telemetryRoutes = require("./routes/telemetryRoutes");
+const geofenceRoutes = require("./routes/geofenceRoutes");
+const alertRoutes = require("./routes/alertRoutes");
 
 const { initSocket } = require("./socket");
 
@@ -20,6 +22,8 @@ connectDB();
 
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/telemetry", telemetryRoutes);
+app.use("/api/geofences", geofenceRoutes);
+app.use("/api/alerts", alertRoutes);
 
 app.get("/", (req, res) => {
   res.send("FleetDash Backend Running");

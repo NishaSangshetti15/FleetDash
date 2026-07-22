@@ -2,6 +2,8 @@ console.log("✅ telemetryController loaded");
 
 const TelemetryBucket = require("../models/TelemetryBucket");
 const Vehicle = require("../models/Vehicle");
+const Geofence = require("../models/Geofence");
+const Alert = require("../models/Alert");
 const { getIO } = require("../socket");
 
 const addTelemetry = async (req, res) => {
@@ -41,6 +43,35 @@ const addTelemetry = async (req, res) => {
     });
 
     await bucket.save();
+
+    // Get all geofences
+const geofences = await Geofence.find();
+
+for (const geofence of geofences) {
+
+  const distance = Math.sqrt(
+    Math.pow(latitude - geofence.center.latitude, 2) +
+    Math.pow(longitude - geofence.center.longitude, 2)
+  );
+
+  const inside = distance <= geofence.radius / 111000;
+
+  if (inside) {
+
+    const alert = new Alert({
+      vehicleId,
+      geofenceName: geofence.name,
+      type: "ENTRY",
+      message: `${vehicleId} entered ${geofence.name}`,
+    });
+
+    await alert.save();
+
+    const io = getIO();
+
+    io.emit("new-alert", alert);
+  }
+}
 
     const updatedVehicle = await Vehicle.findOneAndUpdate(
       { vehicleId },
